@@ -16,7 +16,7 @@ Just type `play` in the project directory and then `run`
 
 ### Running the tests
 
-Type 'play' and then 'test'
+Type `play` and then `test`
 
 ## Test it with curl
 
