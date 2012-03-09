@@ -6,55 +6,28 @@ import play.api.mvc._
 import java.io.File
 import java.io.OutputStream
 
-//JAXP
-import javax.xml.transform.Transformer
-import javax.xml.transform.TransformerFactory
-import javax.xml.transform.Source
-import javax.xml.transform.Result
-import javax.xml.transform.stream.StreamSource
-import javax.xml.transform.sax.SAXResult
-
-//FOP
-import org.apache.fop.apps.FOUserAgent
-import org.apache.fop.apps.Fop
-import org.apache.fop.apps.FopFactory
-//import org.apache.fop.apps.MimeConstants
-import org.apache.xmlgraphics.util.MimeConstants
+import models.PdfGenerator
 
 object Pdf extends Controller {
   def create = Action(parse.multipartFormData) { request =>
-    val outDir   = new File("/tmp")
-    var xmlfile  = new File(outDir, "data.xml")
-    var xsltfile = new File(outDir, "fo.xsl")
-    val pdffile  = new File(outDir, "result.pdf")
+    var xmlfile  = File.createTempFile("data", ".xml")
+    var xsltfile = File.createTempFile("xsl", ".fo")
+    val pdffile  = File.createTempFile("result", ".pdf")
 
     request.body.file("data").map(  _.ref.moveTo(xmlfile, true)  ).getOrElse(BadRequest)
     request.body.file("xslfo").map( _.ref.moveTo(xsltfile, true) ).getOrElse(BadRequest)
 
-    val fopFactory  = FopFactory.newInstance()
-    val foUserAgent = fopFactory.newFOUserAgent()
-    var out = new java.io.BufferedOutputStream(new java.io.FileOutputStream(pdffile))
+    if(xmlfile.length == 0 || xsltfile.length == 0) {
+      BadRequest(<error>something went wrong</error>)
+    }
+    else {
+      val pdf = new PdfGenerator(xmlfile, xsltfile)
+      pdf.generate(pdffile)
 
-    //   # Construct fop with desired output format
-    val fop = fopFactory.newFop(MimeConstants.MIME_PDF, foUserAgent, out)
+      xmlfile.delete()
+      xsltfile.delete()
 
-    // # Setup XSLT
-    val factory = TransformerFactory.newInstance()
-    val transformer = factory.newTransformer(new StreamSource(xsltfile))
-
-    //# Set the value of a <param> in the stylesheet
-    transformer.setParameter("versionParam", "2.0")
-
-    //# Setup input for XSLT transformation
-    val src = new StreamSource(xmlfile)
-
-    //# Resulting SAX events (the generated FO) must be piped through to FOP
-    var res = new SAXResult(fop.getDefaultHandler())
-
-    //# Start XSLT transformation and FOP processing
-    transformer.transform(src, res)
-    out.close()
-
-    Ok.sendFile(pdffile)
+      Ok.sendFile(pdffile)
+    }
   }
 }
