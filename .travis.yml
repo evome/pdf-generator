@@ -1,0 +1,8 @@
+language: java
+script: play test
+notifications:
+  campfire:
+    on_success: always
+    on_failure: always
+    rooms:
+      - "evome:c60a0360ad6b6c967ea7d0116ee83b6ec8d7c9a2@423584"
