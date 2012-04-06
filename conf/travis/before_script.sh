@@ -7,5 +7,5 @@ PLAY_DOWNLOAD=http://download.playframework.org/releases/${PLAY_ZIP}
 
 wget ${PLAY_DOWNLOAD}
 unzip -q ${PLAY_ZIP}
-mv ${PLAY_PACKAGE} ${PLAY_HOME}
+mv ${PLAY_PACKAGE}/* ${PLAY_HOME}
 ls ${PLAY_HOME}
