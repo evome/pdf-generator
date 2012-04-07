@@ -19,7 +19,7 @@ import org.apache.fop.apps.FopFactory
 //import org.apache.fop.apps.MimeConstants
 import org.apache.xmlgraphics.util.MimeConstants
 
-class PdfGenerator(xmlfile: File, xsltfile: File) {
+case class PdfGenerator(xmlfile: File, xsltfile: File) {
   def generate(pdffile:File) = {
     val fopFactory  = FopFactory.newInstance()
     val foUserAgent = fopFactory.newFOUserAgent()
